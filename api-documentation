@@ -1,0 +1,70 @@
+<!--- Initiate Payment --->
+
+<?php
+$parameters = [
+    'identifier' => 'DFU80XZIKS',
+    'currency' => 'USD',
+    'amount' => 100.00,
+    'details' => 'Purchase T-shirt',
+    'ipn_url' => 'http://example.com/ipn_url.php',
+    'cancel_url' => 'http://example.com/cancel_url.php',
+    'success_url' => 'http://example.com/success_url.php',
+    'public_key' => 'your_public_key',
+    'site_logo' => 'https://www.onecashpk.com/assets/images/logoIcon/logo.png',
+    'checkout_theme' => 'dark',
+    'customer_name' => 'John Doe',
+    'customer_email' => 'john@mail.com',
+
+];
+
+//end point
+$url = 'https://www.onecashpk.com/payment/initiate';
+
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_POSTFIELDS,  $parameters);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$result = curl_exec($ch);
+curl_close($ch);
+
+//$result contains the response back.
+?>
+copy
+Example Responses
+
+//Error Response.
+{
+    "error": "true",
+    "message": "Invalid api key"
+}
+
+//Success Response.
+{
+    "success": "ok",
+    "message": "Payment Initiated. Redirect to url.",
+    "url":"http://example.com/initiate/payment/checkout?payment_id=eJSAASDxdrt4DASDASVNASJA7893232432cvmdsamnvASF"
+}
+
+<!--- Validate The Payment and IPN --->
+
+<?php
+
+//Receive the response parameter
+    $status = $_POST['status'];
+    $signature = $_POST['signature'];
+    $identifier = $_POST['identifier'];
+    $data = $_POST['data'];
+
+    // Generate your signature
+    $customKey = $data['amount'].$identifier;
+    $secret = 'YOUR_SECRET_KEY';
+    $mySignature = strtoupper(hash_hmac('sha256', $customKey , $secret));
+
+    $myIdentifier = 'YOUR_GIVEN_IDENTIFIER';
+
+    if($status == "success" && $signature == $mySignature &&  $identifier ==  $myIdentifier){
+        //your operation logic
+    }
+?>
